@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.InputFilter.LengthFilter;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -42,7 +43,9 @@ public class MainActivity extends Activity{
 		
 	
 		SdkFactory.mainInit(context);
+		
 		String initResult = SdkFactory.getInitResult();
+		Log.i("HuangKe----->", initResult);
 		try {
 			JSONObject initResultJsonObj = new JSONObject(initResult);
 			if(initResultJsonObj.getString("status").equals("logined")){

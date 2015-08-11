@@ -75,6 +75,7 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 				e.printStackTrace();
 			}
 			jsonResultInit = dataJsonObjInit.toString();
+			Log.i("HuangKe----->", jsonResultInit);
 		}else{
 			try {
 				dataJsonObjInit.put("status", "unlogined");
@@ -84,6 +85,7 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 				e.printStackTrace();
 			}
 			 jsonResultInit = dataJsonObjInit.toString();
+			 Log.i("HuangKe----->", jsonResultInit);
 		}
 		WGPlatform.handleCallback(((Activity) context).getIntent());
 
