@@ -44,12 +44,12 @@ public class C {
 		}
 
 		public static final String[] c_baidu = { "110000", "Sdk_Baidu" };
-		public static final String[] c_qh360 = { "000023", "Sdk_QiHu360" };
-		public static final String[] c_mi = { "000111", "Sdk_Mi"};
-		public static final String[] c_msdk = {"000112","Sdk_TencentMSdk"};
+		public static final String[] qh360 = { "000023", "Sdk_QiHu360" };
+		public static final String[] mi = { "000111", "Sdk_Mi"};
+		public static final String[] msdk = {"000112","Sdk_TencentMSdk"};
 
 		private static String[] channelInfo() {
-			return c_msdk;
+			return msdk;
 		}
 	}
 	

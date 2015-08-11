@@ -5,6 +5,8 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.tencent.msdk.api.LoginRet;
@@ -30,13 +32,18 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 	private MsdkBaseInfo baseInfo;
 	private long pauseTime = 0;
 	protected static int platform = EPlatform.ePlatform_None.val();
-	JSONObject dataJsonObjInit = new JSONObject();
-	String jsonResultInit;
+
+	private static String jsonResultInit;
+	private static String jsonResultLogin;
+	private static String jsonResultLogout;
+	private static String jsonResultPayment;
 
 	@Override
 	public void mainInit(Context c) {
 		context = c;
 		Log.i("HuangKe----->", context.getPackageName());
+
+		JSONObject dataJsonObjInit = new JSONObject();
 
 		baseInfo = new MsdkBaseInfo();
 		baseInfo.qqAppId = "100703379";
@@ -61,12 +68,13 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 		// 必须保证handleCallback在Initialized之后
 		// launchActivity的onCreat()和onNewIntent()中必须调用
 		// WGPlatform.handleCallback()。否则会造成微信登录无回调
-		
-		//读取本地票据，如果成功直接登录
-		if(getPlatform() == EPlatform.ePlatform_QQ||getPlatform() == EPlatform.ePlatform_Weixin){
+
+		// 读取本地票据，如果成功直接登录
+		if (getPlatform() == EPlatform.ePlatform_QQ
+				|| getPlatform() == EPlatform.ePlatform_Weixin) {
 			WGPlatform.WGLoginWithLocalInfo();
 			token = getOpenId();
-			
+
 			try {
 				dataJsonObjInit.put("status", "logined");
 				dataJsonObjInit.put("user_id", "");
@@ -76,7 +84,8 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 			}
 			jsonResultInit = dataJsonObjInit.toString();
 			Log.i("HuangKe----->", jsonResultInit);
-		}else{
+
+		} else {
 			try {
 				dataJsonObjInit.put("status", "unlogined");
 				dataJsonObjInit.put("user_id", "");
@@ -84,8 +93,8 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			 jsonResultInit = dataJsonObjInit.toString();
-			 Log.i("HuangKe----->", jsonResultInit);
+			jsonResultInit = dataJsonObjInit.toString();
+			Log.i("HuangKe----->", jsonResultInit);
 		}
 		WGPlatform.handleCallback(((Activity) context).getIntent());
 
@@ -105,13 +114,16 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 
 			@Override
 			public void OnLoginNotify(LoginRet ret) {
+				JSONObject dataJsonObjLogin = new JSONObject();
+
 				Logger.d("called");
 				Logger.d("ret.flag" + ret.flag);
 				switch (ret.flag) {
 				case CallbackFlag.eFlag_Succ:
+					Log.i("HuangKe------>", "登录成功");
 					// 登陆成功, 读取各种票据
 					String openId = ret.open_id;
-					//为token赋值
+					// 为token赋值
 					token = openId;
 					Log.i("HuangKe------>", openId);
 					String pf = ret.pf;
@@ -135,17 +147,56 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 							break;
 						}
 					}
-					// 调进入游戏方法
-					// mainActivity.letUserLogin();
+					// 通知游戏登录成功回调
+
+					try {
+						dataJsonObjLogin.put("status", "success");
+						dataJsonObjLogin.put("user_id", "");
+						dataJsonObjLogin.put("token", getOpenId());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					jsonResultLogin = dataJsonObjLogin.toString();
+
 					break;
 
 				// 游戏逻辑，对登陆失败情况分别进行处理
 				case CallbackFlag.eFlag_WX_UserCancel:
+					try {
+						dataJsonObjLogin.put("status", "cancel");
+						dataJsonObjLogin.put("user_id", "");
+						dataJsonObjLogin.put("token", "");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					jsonResultLogin = dataJsonObjLogin.toString();
+
+					break;
 				case CallbackFlag.eFlag_WX_NotInstall:
 				case CallbackFlag.eFlag_WX_NotSupportApi:
 				case CallbackFlag.eFlag_WX_LoginFail:
+					try {
+						dataJsonObjLogin.put("status", "fail");
+						dataJsonObjLogin.put("user_id", "");
+						dataJsonObjLogin.put("token", "");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					jsonResultLogin = dataJsonObjLogin.toString();
+
+					break;
 				case CallbackFlag.eFlag_Local_Invalid:
+					try {
+						dataJsonObjLogin.put("status", "invalid");
+						dataJsonObjLogin.put("user_id", "");
+						dataJsonObjLogin.put("token", "");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					jsonResultLogin = dataJsonObjLogin.toString();
+
 					Logger.d(ret.desc);
+					break;
 				default:
 					// 显示登陆界面
 					// mainActivity.letUserLogout();
@@ -153,18 +204,12 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 				}
 			}
 		});
-		
-	}
-
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void login() {
-		
+
 	}
 
 	@Override
@@ -242,7 +287,8 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 			// startModule();
 			Log.i("HuangKe----->", "已经登录!");
 			Log.i("HuangKe----->", "当前登录平台:" + getPlatform());
-		} else if (getPlatform() == EPlatform.ePlatform_None) {
+		} else if (platform == "QQ"
+				&& getPlatform() == EPlatform.ePlatform_None) {
 			WGPlatform.WGLogin(EPlatform.ePlatform_QQ);
 		} else {
 
@@ -253,7 +299,8 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 			// startModule();
 			Log.i("HuangKe----->", "已经登录!");
 			Log.i("HuangKe----->", "当前登录平台:" + getPlatform());
-		} else if (getPlatform() == EPlatform.ePlatform_None) {
+		} else if (platform == "WEIXIN"
+				&& getPlatform() == EPlatform.ePlatform_None) {
 			WGPlatform.WGLogin(EPlatform.ePlatform_Weixin);
 		} else {
 
@@ -272,21 +319,55 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 		return EPlatform.ePlatform_None;
 
 	}
-	
-	//获取本地票据中的openId
-	public String getOpenId(){
+
+	// 获取本地票据中的openId
+	public String getOpenId() {
 		LoginRet ret = new LoginRet();
-		String openId = null ;
+		String openId = null;
 		WGPlatform.WGGetLoginRecord(ret);
-		if(ret.flag == CallbackFlag.eFlag_Succ){
+		if (ret.flag == CallbackFlag.eFlag_Succ) {
 			openId = ret.open_id;
 		}
 		return openId;
 	}
 
 	@Override
-	public String getInitResult() {
+	public void init() {
 		// TODO Auto-generated method stub
-		return jsonResultInit;
+
 	}
+
+	/**
+	 * 公用的方法，用于获取对应的json结果串
+	 * 
+	 * @param type
+	 * @return
+	 */
+	@Override
+	public String getJsonResult(String type) {
+
+		String jsonResult = null;
+		// TODO Auto-generated method stub
+		while (TextUtils.isEmpty(jsonResult)) {
+			switch (type) {
+			case "init":
+				jsonResult = jsonResultInit;
+				break;
+			case "login":
+				jsonResult = jsonResultLogin;
+				break;
+			case "logout":
+				jsonResult = jsonResultLogout;
+				break;
+			case "payment":
+				jsonResult = jsonResultPayment;
+			default:
+				break;
+			}
+		}
+		Log.i("HuangKe----->", "调用获得json结果串接口所得到的值：" + jsonResult);
+		return jsonResult;
+
+	}
+
 }

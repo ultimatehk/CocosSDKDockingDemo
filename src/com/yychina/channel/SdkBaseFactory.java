@@ -7,8 +7,6 @@ public interface SdkBaseFactory {
 	void mainInit(Context c);
 	
 	void init();
-	
-	String getInitResult();
 
 	void login();
 
@@ -31,4 +29,6 @@ public interface SdkBaseFactory {
 	void onNewIntent(Context context);
 
 	void loginPlatform(String platform);
+	
+	String getJsonResult(String type);
 }

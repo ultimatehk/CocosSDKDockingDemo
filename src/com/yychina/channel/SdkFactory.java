@@ -32,9 +32,7 @@ public class SdkFactory {
 		return baseSdkFactory;
 	}
 
-	/**
-	 * 统一初始化
-	 */
+
 	public static void init() {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
 			@Override
@@ -44,18 +42,7 @@ public class SdkFactory {
 		});
 	}
 
-	/**
-	 * 获得初始化结果串
-	 */
-	public static String getInitResult() {
-		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				getSdkInstance().getInitResult();
-			}
-		});
-		return null;
-	}
+
 
 	/**
 	 * 统一登录
@@ -140,7 +127,15 @@ public class SdkFactory {
 		C.ActivityCurr.setContext(c);
 		getSdkInstance().mainInit(c);
 	}
-
+	/**
+	 * 获取json结果串
+	 * @param type
+	 * @return
+	 */
+	public static String getJsonResult(String type){
+		return getSdkInstance().getJsonResult(type);
+		
+	}
 	public static void resume() {
 		getSdkInstance().resume();
 	}
