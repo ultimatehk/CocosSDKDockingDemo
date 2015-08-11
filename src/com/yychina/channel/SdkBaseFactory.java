@@ -7,6 +7,8 @@ public interface SdkBaseFactory {
 	void mainInit(Context c);
 	
 	void init();
+	
+	String getInitResult();
 
 	void login();
 

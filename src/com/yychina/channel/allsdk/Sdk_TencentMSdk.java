@@ -1,5 +1,7 @@
 package com.yychina.channel.allsdk;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -23,10 +25,13 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 	private static String tag;
 	private static Context context;
 	private String token;
+	private String weixinToken;
 	private String userId;
 	private MsdkBaseInfo baseInfo;
 	private long pauseTime = 0;
 	protected static int platform = EPlatform.ePlatform_None.val();
+	JSONObject dataJsonObjInit = new JSONObject();
+	String jsonResultInit;
 
 	@Override
 	public void mainInit(Context c) {
@@ -56,6 +61,30 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 		// 必须保证handleCallback在Initialized之后
 		// launchActivity的onCreat()和onNewIntent()中必须调用
 		// WGPlatform.handleCallback()。否则会造成微信登录无回调
+		
+		//读取本地票据，如果成功直接登录
+		if(getPlatform() == EPlatform.ePlatform_QQ||getPlatform() == EPlatform.ePlatform_Weixin){
+			WGPlatform.WGLoginWithLocalInfo();
+			token = getOpenId();
+			
+			try {
+				dataJsonObjInit.put("status", "logined");
+				dataJsonObjInit.put("user_id", "");
+				dataJsonObjInit.put("token", getOpenId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			jsonResultInit = dataJsonObjInit.toString();
+		}else{
+			try {
+				dataJsonObjInit.put("status", "unlogined");
+				dataJsonObjInit.put("user_id", "");
+				dataJsonObjInit.put("token", "");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			 jsonResultInit = dataJsonObjInit.toString();
+		}
 		WGPlatform.handleCallback(((Activity) context).getIntent());
 
 		WGPlatform.WGSetObserver(new WGPlatformObserver() {
@@ -80,6 +109,8 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 				case CallbackFlag.eFlag_Succ:
 					// 登陆成功, 读取各种票据
 					String openId = ret.open_id;
+					//为token赋值
+					token = openId;
 					Log.i("HuangKe------>", openId);
 					String pf = ret.pf;
 					String pfKey = ret.pf_key;
@@ -120,6 +151,7 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 				}
 			}
 		});
+		
 	}
 
 	@Override
@@ -227,7 +259,7 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 
 	}
 
-	// 获取当前登录平台
+	// 获取本地票据中的当前登录平台
 	public EPlatform getPlatform() {
 		LoginRet ret = new LoginRet();
 		WGPlatform.WGGetLoginRecord(ret);
@@ -238,5 +270,21 @@ public class Sdk_TencentMSdk implements SdkBaseFactory {
 		return EPlatform.ePlatform_None;
 
 	}
+	
+	//获取本地票据中的openId
+	public String getOpenId(){
+		LoginRet ret = new LoginRet();
+		String openId = null ;
+		WGPlatform.WGGetLoginRecord(ret);
+		if(ret.flag == CallbackFlag.eFlag_Succ){
+			openId = ret.open_id;
+		}
+		return openId;
+	}
 
+	@Override
+	public String getInitResult() {
+		// TODO Auto-generated method stub
+		return jsonResultInit;
+	}
 }

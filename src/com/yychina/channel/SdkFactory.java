@@ -1,5 +1,7 @@
 package com.yychina.channel;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +12,8 @@ import android.content.Intent;
  * @author vic
  *
  */
-public class SdkFactory{
+public class SdkFactory {
+
 	/**
 	 * 获取sdk实例
 	 *
@@ -19,8 +22,10 @@ public class SdkFactory{
 	public static SdkBaseFactory getSdkInstance() {
 		SdkBaseFactory baseSdkFactory = null;
 		try {
-			String className = SdkFactory.class.getPackage().getName() + ".allsdk." + C.Channel.getChannelSdkClassName();
-			baseSdkFactory = (SdkBaseFactory) Class.forName(className).newInstance();// 利用反射得到sdk实例
+			String className = SdkFactory.class.getPackage().getName()
+					+ ".allsdk." + C.Channel.getChannelSdkClassName();
+			baseSdkFactory = (SdkBaseFactory) Class.forName(className)
+					.newInstance();// 利用反射得到sdk实例
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -34,15 +39,29 @@ public class SdkFactory{
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-		getSdkInstance().init();
+				getSdkInstance().init();
 			}
 		});
 	}
 
 	/**
+	 * 获得初始化结果串
+	 */
+	public static String getInitResult() {
+		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				getSdkInstance().getInitResult();
+			}
+		});
+		return null;
+	}
+
+	/**
 	 * 统一登录
+	 * 
 	 * @param luaFunc
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static void login() {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
@@ -52,12 +71,13 @@ public class SdkFactory{
 			}
 		});
 	}
-	
+
 	/**
 	 * 分平台登录
+	 * 
 	 * @param jsonData
 	 */
-	public static void loginPlatform(final String platform){
+	public static void loginPlatform(final String platform) {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -65,8 +85,8 @@ public class SdkFactory{
 			}
 		});
 	}
-	
-	public static void logout(){
+
+	public static void logout() {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -77,8 +97,9 @@ public class SdkFactory{
 
 	/**
 	 * 统一支付
+	 * 
 	 * @param luaFunc
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static void pay(final String jsonData) throws Exception {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
@@ -91,9 +112,10 @@ public class SdkFactory{
 
 	/**
 	 * 统一切换账号
+	 * 
 	 * @param luaFunc
 	 */
-	public static void switchAccount(final int luaFunc){
+	public static void switchAccount(final int luaFunc) {
 		((Activity) C.ActivityCurr.context).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -105,36 +127,37 @@ public class SdkFactory{
 	/**
 	 * 销毁
 	 */
-	public static void distory(){
+	public static void distory() {
 		getSdkInstance().destroy();
 	}
 
 	/**
 	 * 初始化main
+	 * 
 	 * @param activity
 	 */
-	public static void mainInit(Context c){
+	public static void mainInit(Context c) {
 		C.ActivityCurr.setContext(c);
 		getSdkInstance().mainInit(c);
 	}
 
-	public static void resume(){
+	public static void resume() {
 		getSdkInstance().resume();
 	}
 
-	public static void stop(){
+	public static void stop() {
 		getSdkInstance().stop();
 	}
 
-	public static void pause(){
+	public static void pause() {
 		getSdkInstance().pause();
 	}
-	
-	public static void reStart(){
+
+	public static void reStart() {
 		getSdkInstance().restart();
 	}
-	
-	public static void onNewIntent(Context context){
+
+	public static void onNewIntent(Context context) {
 		getSdkInstance().onNewIntent(context);
 	}
 }
